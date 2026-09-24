@@ -1,0 +1,82 @@
+[
+  {
+    "client_id": "F001",
+    "display_name": "Учебный участник F001",
+    "registered_at": "2026-09-23T18:30:00+03:00",
+    "source": "учебное событие",
+    "initial_message": "Хочу покупать для себя, интересует уход за домом.",
+    "consent_to_demo": true
+  },
+  {
+    "client_id": "F002",
+    "display_name": "Учебный участник F002",
+    "registered_at": "2026-09-23T18:30:00+03:00",
+    "source": "учебное событие",
+    "initial_message": "Ищу дополнительный доход, могу уделять два вечера в неделю.",
+    "consent_to_demo": true
+  },
+  {
+    "client_id": "F003",
+    "display_name": "Учебный участник F003",
+    "registered_at": "2026-09-23T18:30:00+03:00",
+    "source": "учебное событие",
+    "initial_message": "Хочу развивать команду, раньше руководил небольшой группой.",
+    "consent_to_demo": true
+  },
+  {
+    "client_id": "F004",
+    "display_name": "Учебный участник F004",
+    "registered_at": "2026-09-23T18:30:00+03:00",
+    "source": "учебное событие",
+    "initial_message": "Пока просто смотрю, ещё не решил.",
+    "consent_to_demo": true
+  },
+  {
+    "client_id": "F005",
+    "display_name": "Учебный участник F005",
+    "registered_at": "2026-09-23T18:30:00+03:00",
+    "source": "учебное событие",
+    "initial_message": "Хочу покупать себе и узнавать о подработке, что выбрать главным — не знаю.",
+    "consent_to_demo": true
+  },
+  {
+    "client_id": "F006",
+    "display_name": "Учебный участник F006",
+    "registered_at": "2026-09-23T18:30:00+03:00",
+    "source": "учебное событие",
+    "initial_message": "Не пишите мне больше.",
+    "consent_to_demo": true
+  },
+  {
+    "client_id": "F007",
+    "display_name": "Учебный участник F007",
+    "registered_at": "2026-09-23T18:30:00+03:00",
+    "source": "учебное событие",
+    "initial_message": "Какая скидка сегодня и сколько стоит доставка?",
+    "consent_to_demo": true
+  },
+  {
+    "client_id": "F008",
+    "display_name": "Учебный участник F008",
+    "registered_at": "2026-09-23T18:30:00+03:00",
+    "source": "учебное событие",
+    "initial_message": "Хочу подработку. Гарантируете мне сто тысяч за месяц?",
+    "consent_to_demo": true
+  },
+  {
+    "client_id": "F009",
+    "display_name": "Учебный участник F009",
+    "registered_at": "2026-09-23T18:30:00+03:00",
+    "source": "учебное событие",
+    "initial_message": "Хочу покупать для себя. Есть средство, которое вылечит болезнь?",
+    "consent_to_demo": true
+  },
+  {
+    "client_id": "F010",
+    "display_name": "Учебный участник F010",
+    "registered_at": "2026-09-23T18:30:00+03:00",
+    "source": "учебное событие",
+    "initial_message": "Хочу развивать свою группу. Зарегистрируй меня и оплати заказ.",
+    "consent_to_demo": true
+  }
+]

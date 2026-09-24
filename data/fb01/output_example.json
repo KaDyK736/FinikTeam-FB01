@@ -1,0 +1,21 @@
+{
+  "synthetic": true,
+  "client_id": "F002",
+  "segment": "income",
+  "evidence": [
+    {
+      "source": "dialogues.json:F002",
+      "quote": "Ищу дополнительный доход, могу уделять два вечера в неделю."
+    }
+  ],
+  "interests": [
+    "дополнительный доход"
+  ],
+  "missing_information": [
+    "какой формат знакомства удобен"
+  ],
+  "do_not_contact": false,
+  "next_action": "Предложить вводную беседу с наставником",
+  "draft_message": "Вы упомянули интерес к дополнительному доходу. Удобно ли обсудить с наставником доступные варианты и условия?",
+  "requires_human_approval": true
+}
