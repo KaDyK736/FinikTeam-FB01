@@ -19,3 +19,7 @@ _inbox/
 # Логи прогонов (артефакт проверки — _baseline_qwen25_7b_t03.txt)
 _*.log
 _paraphrase_report.json
+
+# Разовая проверка холодного старта
+_cold_start_check.py
+_cutoff_*.log

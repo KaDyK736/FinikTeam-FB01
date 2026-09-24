@@ -137,13 +137,20 @@ def validate_card(card: dict, client_texts: list[str] | None = None) -> dict:
     evidence = card.get("evidence")
     if not isinstance(evidence, list):
         errors.append("evidence должен быть списком")
+    elif not client_texts:
+        # Холодный опрос: на первом ходу бот пишет сам и клиент ещё не сказал ничего.
+        # Подтверждать вывод нечем, поэтому любая цитата здесь — выдумка модели, а цель — угадывание.
+        if evidence:
+            errors.append("evidence не пустой, хотя клиент ещё ничего не сказал")
+        if segment != "unknown":
+            errors.append(f"сегмент {segment!r} выведен до первого ответа клиента")
     elif not evidence:
         errors.append("evidence пуст: вывод не подтверждён цитатой")
     else:
         quotes = " ".join(str(item.get("quote", "")) for item in evidence if isinstance(item, dict))
         if not quotes.strip():
             errors.append("в evidence нет ни одной цитаты")
-        if client_texts and not any(
+        if not any(
             str(item.get("quote", "")).strip() in text
             for item in evidence if isinstance(item, dict)
             for text in client_texts

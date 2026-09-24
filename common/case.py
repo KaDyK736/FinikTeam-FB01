@@ -21,9 +21,13 @@ class DialogueContext:
         return self.client_id == UNKNOWN_CLIENT_ID
 
     def client_turn_texts(self) -> list[str]:
-        """Реплики клиента — единственный источник, из которого агент вправе брать цитаты."""
+        """Реплики клиента — единственный источник, из которого агент вправе брать цитаты.
+
+        Исходная реплика события регистрации — тоже реплика клиента: в холодном опросе
+        бот пишет первым, и на первом ходу это может быть единственное его высказывание.
+        """
         turns = [turn.get("text", "") for turn in self.history if turn.get("role") == "user"]
-        return [text for text in [*turns, self.new_message] if text]
+        return [text for text in [self.initial_message, *turns, self.new_message] if text]
 
 
 def load_dataset_case(message: str, client_id: str | None = None) -> DialogueContext:
