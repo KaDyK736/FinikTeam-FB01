@@ -1,7 +1,7 @@
 """Клиент LLM через любой OpenAI-совместимый API: Ollama, Mistral, OpenRouter.
 
 Провайдер меняется только переменными окружения, правок в коде не требуется:
-    LLM_API_KEY        ключ провайдера (у локальной Ollama — любая непустая строка)
+    LLM_API_KEY        ключ провайдера; локальной Ollama ключ не нужен и может быть не задан
     LLM_BASE_URL       по умолчанию https://openrouter.ai/api/v1; локально http://localhost:11434/v1
     LLM_MODEL          модель, например qwen2.5:7b-instruct
     LLM_TEMPERATURE    по умолчанию 0.3
@@ -45,12 +45,21 @@ def get_base_url() -> str:
     return os.getenv("LLM_BASE_URL", DEFAULT_BASE_URL).strip() or DEFAULT_BASE_URL
 
 
+def is_local_endpoint(base_url: str) -> bool:
+    return ("localhost" in base_url or "127.0.0.1" in base_url
+            or base_url.startswith("http://100.") or base_url.startswith("http://192.168."))
+
+
 def get_client() -> AsyncOpenAI:
     global _client
     if _client is not None:
         return _client
 
+    base_url = get_base_url()
     api_key = os.getenv("LLM_API_KEY", "").strip()
+    if not api_key and is_local_endpoint(base_url):
+        # SDK требует непустой ключ, даже если сервер его не проверяет.
+        api_key = "ollama"
     if not api_key:
         raise LlmNotConfigured(
             "LLM_API_KEY не задан. Ключ берётся у выбранного провайдера "
@@ -65,10 +74,10 @@ def get_client() -> AsyncOpenAI:
 
     _client = AsyncOpenAI(
         api_key=api_key,
-        base_url=get_base_url(),
+        base_url=base_url,
         timeout=float(os.getenv("LLM_TIMEOUT", "90")),
         max_retries=int(os.getenv("LLM_MAX_RETRIES", "0")),
-        default_headers=attribution if "openrouter" in get_base_url() else {},
+        default_headers=attribution if "openrouter" in base_url else {},
     )
     return _client
 

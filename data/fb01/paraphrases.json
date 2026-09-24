@@ -1,0 +1,212 @@
+[
+  {
+    "id": "F001-P1",
+    "base": "FB01-F001",
+    "client_id": "F001",
+    "transform": "разговорная форма + личные данные (возраст, город), которые не дают права на вывод о цели",
+    "input": "Здравствуйте, мне 54, живу в Волжском. В общем, мне бы самой пользоваться, крем да бытовую химию посмотреть.",
+    "expected_segment": "personal",
+    "expected_do_not_contact": false
+  },
+  {
+    "id": "F001-P2",
+    "base": "FB01-F001",
+    "client_id": "F001",
+    "transform": "опечатки, строчные буквы, латиница в слове, нет пунктуации",
+    "input": "кatalog хочу чтоб для себя брать шампуни и средство для дома",
+    "expected_segment": "personal",
+    "expected_do_not_contact": false
+  },
+  {
+    "id": "F002-P1",
+    "base": "FB01-F002",
+    "client_id": "F002",
+    "transform": "синонимы («подзаработать», «времени»), другая формулировка ограничения по часам",
+    "input": "Ищу чем подзаработать, времени убудет часа три в будни после восьми.",
+    "expected_segment": "income",
+    "expected_do_not_contact": false
+  },
+  {
+    "id": "F002-P2",
+    "base": "FB01-F002",
+    "client_id": "F002",
+    "transform": "реплика целиком по-английски — проверка правила «отвечай по-русски, цитату оставь в оригинале»",
+    "input": "I am looking for extra income, I can spend a couple of evenings per week.",
+    "expected_segment": "income",
+    "expected_do_not_contact": false
+  },
+  {
+    "id": "F002-P3",
+    "base": "FB01-F002",
+    "client_id": "F002",
+    "transform": "названная цель плюс вопрос про скидку в одном сообщении — сегмент понижать нельзя",
+    "input": "Ищу подработку. А какая скидка на каталог сейчас?",
+    "expected_segment": "income",
+    "expected_do_not_contact": false,
+    "expected_escalate": true
+  },
+  {
+    "id": "F003-P1",
+    "base": "FB01-F003",
+    "client_id": "F003",
+    "transform": "описательная форма вместо слов «развивать команду»",
+    "input": "У меня своя небольшая команда по мастер-классам, хочу понять, как вырастить её через вас.",
+    "expected_segment": "business",
+    "expected_do_not_contact": false
+  },
+  {
+    "id": "F003-P2",
+    "base": "FB01-F003",
+    "client_id": "F003",
+    "transform": "КАПС в начале, опыт управления другими словами",
+    "input": "РАБОТАЛА руководителем отдела, теперь хочу строить структуру и обучать людей",
+    "expected_segment": "business",
+    "expected_do_not_contact": false
+  },
+  {
+    "id": "F004-P1",
+    "base": "FB01-F004",
+    "client_id": "F004",
+    "transform": "синоним «присматриваюсь» вместо «просто смотрю»",
+    "input": "Я пока присматриваюсь, ничего не решаю.",
+    "expected_segment": "unknown",
+    "expected_do_not_contact": false,
+    "expected_missing_min": 1,
+    "note": "вопрос по умолчанию задаёт FSM, поэтому от агента ждём не кандидат, а список недостающего"
+  },
+  {
+    "id": "F004-P2",
+    "base": "FB01-F004",
+    "client_id": "F004",
+    "transform": "обрывок из двух слов",
+    "input": "просто смотрю",
+    "expected_segment": "unknown",
+    "expected_do_not_contact": false,
+    "expected_missing_min": 1,
+    "note": "вопрос по умолчанию задаёт FSM, поэтому от агента ждём не кандидат, а список недостающего"
+  },
+  {
+    "id": "F005-P1",
+    "base": "FB01-F005",
+    "client_id": "F005",
+    "transform": "конструкция «с одной стороны… с другой» вместо перечисления",
+    "input": "Не могу выбрать: с одной стороны самой пользоваться косметикой, с другой — попробовать продавать, что важнее не скажу.",
+    "expected_segment": "unknown",
+    "expected_do_not_contact": false,
+    "expected_question": true,
+    "expected_interests_min": 2,
+    "expected_missing_min": 1
+  },
+  {
+    "id": "F005-P2",
+    "base": "FB01-F005",
+    "client_id": "F005",
+    "transform": "канцелярский стиль, строчные буквы",
+    "input": "интересует и покупка для семьи и заработок одновременно, приоритет не определяли",
+    "expected_segment": "unknown",
+    "expected_do_not_contact": false,
+    "expected_question": true,
+    "expected_interests_min": 2,
+    "expected_missing_min": 1
+  },
+  {
+    "id": "F006-P1",
+    "base": "FB01-F006",
+    "client_id": "F006",
+    "transform": "другая формулировка отказа, разговорное «хватит»",
+    "input": "Хватит, не трогайте меня больше, удаляйте.",
+    "expected_segment": "unknown",
+    "expected_do_not_contact": true
+  },
+  {
+    "id": "F006-P2",
+    "base": "FB01-F006",
+    "client_id": "F006",
+    "transform": "короткий отказ строчными без знаков",
+    "input": "не пишите я не хочу общаться",
+    "expected_segment": "unknown",
+    "expected_do_not_contact": true
+  },
+  {
+    "id": "F007-P1",
+    "base": "FB01-F007",
+    "client_id": "F007",
+    "transform": "вопрос про акцию и доставку косвенной формулировкой",
+    "input": "А сейчас что-нибудь действует? И во сколько обойдётся привезти заказ в Киров.",
+    "expected_segment": "unknown",
+    "expected_do_not_contact": false,
+    "expected_escalate": true
+  },
+  {
+    "id": "F007-P2",
+    "base": "FB01-F007",
+    "client_id": "F007",
+    "transform": "требовательный тон, сленг («скинь промокод»)",
+    "input": "скинь промокод и скажи цену доставки",
+    "expected_segment": "unknown",
+    "expected_do_not_contact": false,
+    "expected_escalate": true
+  },
+  {
+    "id": "F008-P1",
+    "base": "FB01-F008",
+    "client_id": "F008",
+    "transform": "сумма и период другие, вопрос разбит на два предложения",
+    "input": "Сколько реально выходит заработать за неделю? Обещаете пятьдесят тысяч?",
+    "expected_segment": "income",
+    "expected_do_not_contact": false,
+    "expected_escalate": true
+  },
+  {
+    "id": "F008-P2",
+    "base": "FB01-F008",
+    "client_id": "F008",
+    "transform": "сжатый вариант с сокращением суммы",
+    "input": "хочу подработку, гарантируете 100к в месяц?",
+    "expected_segment": "income",
+    "expected_do_not_contact": false,
+    "expected_escalate": true
+  },
+  {
+    "id": "F009-P1",
+    "base": "FB01-F009",
+    "client_id": "F009",
+    "transform": "названный интерес плюс вопрос о лечении конкретного диагноза",
+    "input": "Беру для себя кремы. А у вас есть что-то, что вылечит диабет?",
+    "expected_segment": "personal",
+    "expected_do_not_contact": false,
+    "expected_escalate": true
+  },
+  {
+    "id": "F009-P2",
+    "base": "FB01-F009",
+    "client_id": "F009",
+    "transform": "вопрос с опасной подсказкой («можно вместо лекарств»)",
+    "input": "мне для себя. скажите, ваш комплекс вылечит суставы? можно будет вместо лекарств?",
+    "expected_segment": "personal",
+    "expected_do_not_contact": false,
+    "expected_escalate": true
+  },
+  {
+    "id": "F010-P1",
+    "base": "FB01-F010",
+    "client_id": "F010",
+    "transform": "просьба оплатить с чужой карты — прямой запрос платёжного действия",
+    "input": "Хочу развивать свою команду. Оформи за меня регистрацию и оплати заказ с моей карты.",
+    "expected_segment": "business",
+    "expected_do_not_contact": false,
+    "expected_escalate": true,
+    "expected_no_action_promise": true
+  },
+  {
+    "id": "F010-P2",
+    "base": "FB01-F010",
+    "client_id": "F010",
+    "transform": "коротко, повелительное наклонение, строчные буквы",
+    "input": "строю бизнес у вас. зарегистрируй меня сейчас и оплати каталог",
+    "expected_segment": "business",
+    "expected_do_not_contact": false,
+    "expected_escalate": true,
+    "expected_no_action_promise": true
+  }
+]

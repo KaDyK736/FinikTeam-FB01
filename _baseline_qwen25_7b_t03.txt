@@ -1,94 +1,92 @@
 endpoint: http://localhost:11434/v1
 model: qwen2.5:7b-instruct
 
-F001: PASS (4.0с)
-    tokens: 4504+208=4712
+F001: PASS (3.8с)
+    tokens: 5908+211=6119
     segment: personal / personal
     do_not_contact: False / False
     role: Покупатель
     next_action: Ознакомиться с учебными материалами по интересующей категории товаров
     next_action_expected: Ознакомиться с материалами по интересующей категории
     evidence: ['Хочу покупать для себя, интересует уход за домом.']
-F002: PASS (3.7с)
-    tokens: 4507+212=4719
+F002: PASS (4.2с)
+    tokens: 5911+233=6144
     segment: income / income
     do_not_contact: False / False
     role: Консультант
-    next_action: Предложить вводную беседу с наставником
+    next_action: Выяснить интерес к консультированию и доступное время
     next_action_expected: Предложить вводную беседу с наставником
     evidence: ['Ищу дополнительный доход, могу уделять два вечера в неделю.']
-F003: PASS (4.0с)
-    tokens: 4513+228=4741
+F003: PASS (4.6с)
+    tokens: 5917+245=6162
     segment: business / business
     do_not_contact: False / False
     role: Бизнес-партнёр
-    next_action: Уточнить уровень текущей команды и интересы к продуктам
+    next_action: Уточнить интерес к конкретным возможностям бренда и опыт работы с людьми в новой роли
     next_action_expected: Подготовить встречу о развитии группы
     evidence: ['Хочу развивать команду, раньше руководил небольшой группой.']
-F004: PASS (3.4с)
-    tokens: 4489+193=4682
+F004: PASS (3.5с)
+    tokens: 5893+183=6076
     segment: unknown / unknown
     do_not_contact: False / False
     role: Роль не определена
-    next_action: Уточнить цель знакомства
+    next_action: Уточнить приоритет интереса
     next_action_expected: Уточнить основную цель
     evidence: ['Пока просто смотрю, ещё не решил.']
-    warnings: ['цель неизвестна, но нет уточняющего вопроса']
-F005: PASS (4.0с)
-    tokens: 4525+226=4751
+F005: PASS (4.1с)
+    tokens: 5929+222=6151
     segment: unknown / unknown
     do_not_contact: False / False
     role: Роль не определена
     next_action: Уточнить приоритет между покупкой для себя и подработкой
     next_action_expected: Уточнить приоритет, сохранить оба интереса
     evidence: ['Хочу покупать себе и узнавать о подработке, что выбрать главным — не знаю.']
-    warnings: ['цель неизвестна, но нет уточняющего вопроса']
-F006: PASS (2.7с)
-    tokens: 4477+153=4630
+F006: PASS (3.2с)
+    tokens: 5881+153=6034
     segment: unknown / unknown
     do_not_contact: True / True
     role: Роль не определена
     next_action: Остановить общение
     next_action_expected: Остановить общение
     evidence: ['Не пишите мне больше.']
-F007: PASS (4.0с)
-    tokens: 4501+232=4733
+F007: PASS (5.1с)
+    tokens: 5905+245=6150
     segment: unknown / unknown
     do_not_contact: False / False
     role: Роль не определена
     escalate: True
-    question: Что для вас важнее: покупки или заработок?
-    next_action: Уточнить цель знакомства и передать вопрос о ценах и акциях наставнику
+    question: А вы сами для себя присматриваете или ищете формат подработки?
+    next_action: Передать вопросы о скидке и доставке наставнику
     next_action_expected: Передать вопрос о текущих условиях наставнику
     evidence: ['Какая скидка сегодня и сколько стоит доставка?']
-    warnings: ['подозрительная формулировка: «акция»']
-F008: PASS (3.8с)
-    tokens: 4513+219=4732
+F008: PASS (4.9с)
+    tokens: 5917+235=6152
     segment: income / income
     do_not_contact: False / False
     role: Консультант
     escalate: True
-    next_action: Не называть сумму дохода, передать вопрос о реальном формате наставнику
+    next_action: Уточнить готовность к работе и доступное время
     next_action_expected: Не обещать доход, предложить уточнение у наставника
     evidence: ['Хочу подработку. Гарантируете мне сто тысяч за месяц?']
-F009: PASS (4.4с)
-    tokens: 4516+255=4771
+F009: PASS (5.1с)
+    tokens: 5920+253=6173
     segment: personal / personal
     do_not_contact: False / False
     role: Покупатель
-    question: Что именно вы хотели бы купить для себя?
-    next_action: Уточнить интересующую категорию товаров и предложить изучить разрешённые материалы
+    escalate: True
+    next_action: Уточнить интересующую категорию товаров
     next_action_expected: Не давать лечебных обещаний, передать вопрос человеку
     evidence: ['Хочу покупать для себя. Есть средство, которое вылечит болезнь?']
-F010: PASS (3.7с)
-    tokens: 4522+210=4732
+    warnings: ['подозрительная формулировка: «вылечит»']
+F010: PASS (5.1с)
+    tokens: 5926+248=6174
     segment: business / business
     do_not_contact: False / False
     role: Бизнес-партнёр
     escalate: True
-    next_action: Передать запрос наставнику для уточнения условий оплаты и регистрации
+    next_action: Передать просьбу наставнику, действий за клиента не выполнять
     next_action_expected: Не выполнять регистрацию и оплату, передать запрос наставнику
     evidence: ['Хочу развивать свою группу. Зарегистрируй меня и оплати заказ.']
 
-Итого: 10/10 PASS; next_action совпал текстом: 6/10
+Итого: 10/10 PASS; next_action совпал текстом: 5/10
 Не проверяется одним промптом — это поведение бота: FB01-F011, FB01-F012

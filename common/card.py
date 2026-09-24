@@ -172,8 +172,9 @@ def validate_card(card: dict, client_texts: list[str] | None = None) -> dict:
         if phrase in answer:
             warnings.append(f"подозрительная формулировка: «{phrase}»")
 
-    if segment == "unknown" and not card.get("do_not_contact") \
-            and not str(card.get("clarifying_question") or "").strip():
-        warnings.append("цель неизвестна, но нет уточняющего вопроса")
+    # Ведущий диалога — машина состояний, поэтому пустой clarifying_question при unknown теперь норма:
+    # бот задаст свой вопрос. Опасен обратный случай — нечем задавать: FSM идёт по missing_information.
+    if segment == "unknown" and not card.get("do_not_contact") and not card.get("missing_information"):
+        warnings.append("цель неизвестна, и missing_information пуст — спрашивать будет не о чём")
 
     return {"ok": not errors, "errors": errors, "warnings": warnings}
