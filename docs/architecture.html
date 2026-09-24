@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Архитектура ИИ-агента: помощник нового клиента (FB01)</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Arial, sans-serif; }
+  body { background: #fff; width: 1400px; padding: 18px 22px 22px; color: #1b2440; }
+  .head { display: flex; align-items: center; gap: 12px; border-bottom: 3px solid #d6236a; padding-bottom: 10px; margin-bottom: 14px; }
+  .head .logo { width: 34px; height: 34px; background: #d6236a; border-radius: 8px; position: relative; flex: none; }
+  .head .logo::before, .head .logo::after { content:''; position:absolute; width:6px; height:6px; background:#fff; border-radius:50%; top:12px; }
+  .head .logo::before { left:8px; } .head .logo::after { right:8px; }
+  .head h1 { font-size: 21px; letter-spacing: .5px; color: #1b2440; text-transform: uppercase; }
+  .cols { display: grid; grid-template-columns: 300px 1fr 330px; gap: 16px; }
+  .panel { border-radius: 14px; padding: 12px 14px 14px; }
+  .panel h2 { font-size: 13.5px; text-transform: uppercase; letter-spacing: .4px; display: flex; gap: 8px; align-items: center; margin-bottom: 10px; }
+  .card { background: #fff; border-radius: 10px; padding: 9px 11px; margin-bottom: 9px; box-shadow: 0 1px 3px rgba(20,30,60,.12); }
+  .card h3 { font-size: 13px; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+  .card ul { list-style: none; }
+  .card li { font-size: 11.5px; line-height: 1.45; color: #3c4763; }
+  .card li::before { content: '•'; color: inherit; margin-right: 5px; }
+  .tag { display: inline-block; font-size: 9.5px; font-weight: 700; color: #fff; border-radius: 4px; padding: 1px 6px; vertical-align: 1px; }
+  /* left: pink */
+  .left { background: #fbd9e6; }
+  .left h2 { color: #b3124f; }
+  .left .card { border-left: 4px solid #d6236a; }
+  .left .tag { background: #d6236a; }
+  /* middle */
+  .mid { display: flex; flex-direction: column; gap: 14px; }
+  .top-mid { background: #dbe4fb; }
+  .top-mid h2 { color: #1c3f94; }
+  .top-mid .row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 9px; }
+  .top-mid .card { border-top: 4px solid #1c3f94; margin-bottom: 0; }
+  .top-mid .tag { background: #1c3f94; }
+  .core { background: #d9f4ec; flex: 1; }
+  .core h2 { color: #0a7a5c; }
+  .step { display: flex; gap: 10px; background: #fff; border-radius: 10px; padding: 9px 11px; margin-bottom: 9px; box-shadow: 0 1px 3px rgba(20,30,60,.12); }
+  .step .n { flex: none; width: 24px; height: 24px; border-radius: 50%; background: #0fae7e; color: #fff; font-weight: 700; font-size: 13px; display: flex; align-items: center; justify-content: center; margin-top: 2px; }
+  .step h3 { font-size: 13px; margin-bottom: 3px; }
+  .step ul { list-style: none; }
+  .step li { font-size: 11.5px; color: #3c4763; line-height: 1.45; }
+  .step li::before { content: '—'; margin-right: 5px; color: #0fae7e; }
+  .bottom-mid { background: #eef1f7; }
+  .bottom-mid h2 { color: #40507a; }
+  .bottom-mid .row { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+  .bottom-mid .card { margin-bottom: 0; border-left: 4px solid #40507a; }
+  .bottom-mid .tag { background: #40507a; }
+  /* right: navy */
+  .right { background: #1c2b52; }
+  .right h2 { color: #fff; }
+  .right .card { border-left: 4px solid #2f9e6e; }
+  .right .card h3 { color: #1b2440; }
+  .right .tag { background: #2f9e6e; }
+  .arrowline { display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 11px; color: #6b7694; margin: 2px 0; }
+  .arrowline b { color: #0a7a5c; font-size: 15px; }
+  /* principles */
+  .principles { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 16px; border-top: 2px solid #e3e7f0; padding-top: 12px; }
+  .pr { display: flex; gap: 9px; }
+  .pr .ico { flex: none; width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 13px; font-weight: 700; }
+  .pr h4 { font-size: 12px; text-transform: uppercase; letter-spacing: .3px; margin-bottom: 2px; }
+  .pr p { font-size: 11px; color: #4a5573; line-height: 1.4; }
+  .pr:nth-child(1) .ico { background: #d6236a; } .pr:nth-child(1) h4 { color: #d6236a; }
+  .pr:nth-child(2) .ico { background: #1c3f94; } .pr:nth-child(2) h4 { color: #1c3f94; }
+  .pr:nth-child(3) .ico { background: #0fae7e; } .pr:nth-child(3) h4 { color: #0a7a5c; }
+  .pr:nth-child(4) .ico { background: #f07f13; } .pr:nth-child(4) h4 { color: #f07f13; }
+</style>
+</head>
+<body>
+
+<div class="head">
+  <div class="logo"></div>
+  <h1>Архитектура ИИ-агента: помощник нового клиента (FB01) · команда Finik</h1>
+</div>
+
+<div class="cols">
+
+  <!-- LEFT -->
+  <div class="panel left">
+    <h2>Входные данные и интерфейсы</h2>
+    <div class="card">
+      <h3><span class="tag">JSON</span> Событие регистрации</h3>
+      <ul>
+        <li>Выгрузка сайта: client_id, номер телефона, стенд</li>
+        <li>case_seed.py → 10 учебных карточек F001–F010</li>
+        <li>Пустой client_id → карточка не заводится (F011)</li>
+        <li>Повторная загрузка → update без дублей (F012)</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3><span class="tag">TELEGRAM</span> Чат с клиентом (aiogram 3)</h3>
+      <ul>
+        <li>Свободный ответ: цель, интересы, время</li>
+        <li>Кнопки меню и анкета «Моя анкета»</li>
+        <li>Сверка по номеру телефона, роль наставника</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3><span class="tag">ТЕСТЫ</span> Контракт кейса</h3>
+      <ul>
+        <li>tests.json — 12 проверок, ожидания снаружи</li>
+        <li>console_chat.py — ручной прогон диалога</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3><span class="tag">UI</span> Команды наставника</h3>
+      <ul>
+        <li>/cards и фильтры по сегментам ролей</li>
+        <li>Доступ — после сверки номера из списка наставников</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- MIDDLE -->
+  <div class="mid">
+    <div class="panel top-mid">
+      <h2>База знаний и правила (JSON)</h2>
+      <div class="row">
+        <div class="card">
+          <h3><span class="tag">JSON</span> knowledge_base.json</h3>
+          <ul><li>Границы: без обещаний дохода, лечения, выдуманных акций</li></ul>
+        </div>
+        <div class="card">
+          <h3><span class="tag">JSON</span> segmentation_rules.json</h3>
+          <ul><li>4 сегмента: personal / income / business / unknown</li></ul>
+        </div>
+        <div class="card">
+          <h3><span class="tag">JSON</span> dialogues.json</h3>
+          <ul><li>Реплики диалога, переспрос, прощание, отказ</li></ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="arrowline"><b>▼</b> правила и знания <b>▼</b></div>
+
+    <div class="panel core">
+      <h2>Ядро агента (assistant/engine.py)</h2>
+      <div class="step">
+        <div class="n">1</div>
+        <div>
+          <h3>Классификатор намерений и сегментация</h3>
+          <ul>
+            <li>Сегмент по цели, цель не угадывается — unknown + уточняющий вопрос</li>
+            <li>Цитата-основание берётся дословно из реплик клиента</li>
+            <li>Смена цели → пересчёт сегмента, старая цитата остаётся в истории</li>
+          </ul>
+        </div>
+      </div>
+      <div class="step">
+        <div class="n">2</div>
+        <div>
+          <h3>Фильтры безопасности (Guards)</h3>
+          <ul>
+            <li>Отказ do_not_contact → диалог остановлен, черновика нет</li>
+            <li>Стоп-слова (доход, «вылечит») → escalate, без обещаний</li>
+            <li>Вопрос вне базы → наставнику; действия за клиента запрещены</li>
+          </ul>
+        </div>
+      </div>
+      <div class="step">
+        <div class="n">3</div>
+        <div>
+          <h3>Генератор карточки и черновика</h3>
+          <ul>
+            <li>Карточка: segment, evidence, interests, next_action, статус</li>
+            <li>Черновик сообщения наставнику: requires_human_approval = true</li>
+            <li>Номера телефонов скрыты у наставника, без путей к файлам</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="arrowline"><b>▼</b> готовые артефакты и проверки <b>▼</b></div>
+
+    <div class="panel bottom-mid">
+      <h2>Хранение и LLM-линия</h2>
+      <div class="row">
+        <div class="card">
+          <h3><span class="tag">SQLITE</span> database/ (repository, models)</h3>
+          <ul><li>Карточки, роли, привязка telegram_id по номеру, история</li></ul>
+        </div>
+        <div class="card">
+          <h3><span class="tag">LLM</span> qwen2.5:7b (Ollama, локально)</h3>
+          <ul><li>Параллельная линия извлечения: 10/10 кейсов, 21/21 перефраз</li></ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT -->
+  <div class="panel right">
+    <h2>Выходные артефакты для наставника</h2>
+    <div class="card">
+      <h3><span class="tag">CARD</span> Карточка клиента</h3>
+      <ul>
+        <li>Сегмент и роль (покупатель / партнёр / неопределившийся)</li>
+        <li>Ключевая цитата — дословно от клиента</li>
+        <li>Интересы, следующий шаг, статус ожидания</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3><span class="tag">TESTS</span> Таблица проверок</h3>
+      <ul>
+        <li>bot_flow_test.py + run_tests.py</li>
+        <li>Пройдено 172/172, статус 12/12 tests.json</li>
+        <li>Лог: results/FB01_Проверки.md</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3><span class="tag">UI</span> Рабочее место наставника</h3>
+      <ul>
+        <li>Фильтры карточек: клиенты / партнёры / неопределившиеся</li>
+        <li>Кнопка «Связаться с партнёром» — по роли</li>
+        <li>Отправку клиенту подтверждает человек</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h3><span class="tag">NOTIFY</span> Уведомление клиенту</h3>
+      <ul>
+        <li>От конкретного наставника, без обещаний дохода и цен</li>
+        <li>Напоминает, как остановить общение</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<div class="principles">
+  <div class="pr">
+    <div class="ico">🔒</div>
+    <div><h4>Безопасность</h4><p>Автоотправка клиенту запрещена; ключи только в .env; данные вымышленные</p></div>
+  </div>
+  <div class="pr">
+    <div class="ico">✓</div>
+    <div><h4>Точность</h4><p>Каждый вывод подтверждён цитатой; цель не угадывается — переспрос</p></div>
+  </div>
+  <div class="pr">
+    <div class="ico">⚡</div>
+    <div><h4>Эффективность</h4><p>Разбор новичка 40 мин → 5 мин (гипотеза, замер на пилоте)</p></div>
+  </div>
+  <div class="pr">
+    <div class="ico">👤</div>
+    <div><h4>Поддержка человека</h4><p>Наставник принимает решение; агент готовит черновики и карточки</p></div>
+  </div>
+</div>
+
+</body>
+</html>
