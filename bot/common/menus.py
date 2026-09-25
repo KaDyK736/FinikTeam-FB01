@@ -8,22 +8,35 @@ from aiogram.types import Message
 
 from assistant import engine
 from states.dialogue import Dialogue
-from utils.cards import client_card_text
 
 STOP_TEXT = ('Первичный диалог окончен: дальнейшие сообщения не приходят. '
              'Карточка сохранена, вопрос передам наставнику.')
+
+# Экранный текст меню. Анкету сюда не выводим: её показывают кнопкой «Моя анкета»,
+# иначе человек видит заголовок «вот ваша анкета» без самой анкеты.
+MENU_TEXT = (
+    'Меню.\n'
+    '«Начать диалог» — задам пару вопросов для карточки.\n'
+    '«Моя анкета» — покажу, что уже записано.\n'
+    '«Изменить анкету» — поправить то, чего нет на сайте.\n'
+    '«Вопрос наставнику» — отвечу по базе или передам вопрос человеку.'
+)
 
 
 async def show_menu(message: Message, client, prefix: str | None = None) -> None:
     from kbds.reply import client_menu
 
-    text = client_card_text(client) if prefix is None else prefix
+    text = MENU_TEXT if prefix is None else prefix
     await message.answer(text, reply_markup=client_menu(with_phone=not client.site_loaded))
 
 
-async def ask_next(message: Message, state: FSMContext, profile: dict) -> dict:
+async def ask_next(message: Message, state: FSMContext, profile: dict,
+                   previous: dict | None = None) -> dict:
     """Задаёт следующий недостающий вопрос либо подводит итог диалога.
 
+    `previous` — карточка до последнего ответа. Реплики про флаги показываем
+    только по новым флагам: кнопка «Начать диалог» обязана возвращать к
+    следующему вопросу, а не пересказывать всё, о чём уже предупреждали.
     Возвращает профиль с проставленным dialogue_step.
     """
     if profile.get('do_not_contact'):
@@ -32,7 +45,7 @@ async def ask_next(message: Message, state: FSMContext, profile: dict) -> dict:
         profile['dialogue_step'] = 'stopped'
         return profile
 
-    for reply in engine.replies_for(profile):
+    for reply in engine.replies_for(profile, already=previous):
         await message.answer(reply)
 
     question = engine.next_question(profile)

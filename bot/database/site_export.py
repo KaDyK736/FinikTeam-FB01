@@ -38,7 +38,7 @@ def register_url() -> str:
 # Остальные номера вымышлены. При передаче архива третьим лицам номер в этой
 # строке меняют на вымышленный.
 CASE_FORMS: tuple[dict, ...] = (
-    {'client_id': 'F001', 'phone': '+79044335580', 'consent': True},
+    {'client_id': 'F001', 'phone': '+79964925242', 'consent': True},
     {'client_id': 'F002', 'phone': '+79134862057', 'consent': True},
     {'client_id': 'F003', 'phone': '+79214750918', 'consent': True},
     {'client_id': 'F004', 'phone': '+79052384617', 'consent': True},

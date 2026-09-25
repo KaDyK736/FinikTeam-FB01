@@ -134,8 +134,8 @@ async def check_loader() -> None:
         client, status, note = await orm_apply_event(session, {'initial_message': 'Привет'})
         check('FB01-F011 карточка без client_id не создана', status == INVALID and client is None, note)
         check('FB01-F011 не смешивается с другой карточкой',
-              (await orm_get_client(session, 'F001')).goal_answer ==
-              'Хочу покупать для себя, интересует уход за домом.')
+              (await orm_get_client(session, 'F002')).goal_answer ==
+              'Ищу дополнительный доход, могу уделять два вечера в неделю.')
 
         before = await orm_count_clients(session)
         again = case_seed.events()[0]
@@ -152,7 +152,8 @@ async def check_loader() -> None:
         clients = await orm_list_clients(session, limit=100)
         check('сегменты всех событий совпали с ожиданиями',
               {c.client_id: c.segment for c in clients} == {
-                  'F001': 'personal', 'F002': 'income', 'F003': 'business', 'F004': 'unknown',
+                  # F001 — карточка живого демо: её заполняет диалог, а не загрузчик.
+                  'F001': 'unknown', 'F002': 'income', 'F003': 'business', 'F004': 'unknown',
                   'F005': 'unknown', 'F006': 'unknown', 'F007': 'unknown', 'F008': 'income',
                   'F009': 'personal', 'F010': 'business'})
         f006 = await orm_get_client(session, 'F006')
@@ -160,10 +161,17 @@ async def check_loader() -> None:
               f006.do_not_contact and engine.build_card(profile_of(f006))['draft_message'] == '')
 
         f001 = await orm_get_client(session, 'F001')
-        check('карточка F001 собрана из tests.json и номера сайта',
+        check('карточка живого демо пуста до диалога',
               f001.source == case_seed.SOURCE_LABEL and f001.site_loaded
-              and f001.goal_answer == 'Хочу покупать для себя, интересует уход за домом.',
-              f001.source)
+              and not f001.goal_answer and not f001.interests and not f001.flags,
+              f'цель={f001.goal_answer!r}')
+        check('у демо-карточки нет и первой реплики в истории',
+              'initial' not in {t.step for t in await orm_list_turns(session, f001)})
+        f009 = await orm_get_client(session, 'F009')
+        check('остальные карточки собраны из tests.json и номера сайта',
+              f009.source == case_seed.SOURCE_LABEL and f009.site_loaded
+              and f009.goal_answer == 'Хочу покупать для себя. Есть средство, которое вылечит болезнь?',
+              f009.goal_answer)
         check('настоящий номер из .env лёг на карточку F001',
               f001.site_phone == DEMO_PHONE, mask_phone(f001.site_phone))
         phones = {c.client_id: c.site_phone for c in clients if c.client_id.startswith('F')}
@@ -292,7 +300,7 @@ async def check_role_filter() -> None:
         check('роли покрывают все карточки без потерь и дублей',
               sum(len(items) for role, items in by_role.items() if role != 'all') == len(everyone))
         check('клиенты — это покупка для себя',
-              {c.client_id for c in by_role['client']} == {'F001', 'F009'},
+              {c.client_id for c in by_role['client']} == {'F009'},
               str(sorted(c.client_id for c in by_role['client'])))
         check('партнёры по бизнесу — доход и развитие группы',
               {c.client_id for c in by_role['partner']} == {'F002', 'F003', 'F008', 'F010'},

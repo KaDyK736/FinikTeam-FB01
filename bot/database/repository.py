@@ -10,7 +10,7 @@
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from assistant import engine
+from assistant import analyzer, engine
 from common.edit_fields import EDIT_LABELS, apply_edit
 from database.models import Client, DialogueTurn, Mentor
 from utils.validators import normalize_phone
@@ -192,13 +192,13 @@ async def orm_apply_event(session: AsyncSession, event) -> tuple[Client | None, 
 
     if status == CREATED and initial:
         await orm_add_turn(session, client, 'user', initial, step='initial')
-        updated = engine.apply_answer(profile_of(client), initial, 'goal')
+        updated = await analyzer.apply_answer_async(profile_of(client), initial, 'goal')
         _store_profile(client, updated)
     elif status == UPDATED:
         # Явная коррекция из нового события перекрывает цель, история сохраняется.
         if initial and initial != client.goal_answer:
             await orm_add_turn(session, client, 'user', initial, step='correction')
-            updated = engine.apply_answer(profile_of(client), initial, 'goal')
+            updated = await analyzer.apply_answer_async(profile_of(client), initial, 'goal')
             _store_profile(client, updated)
 
     await session.commit()
@@ -215,9 +215,13 @@ def _store_profile(client: Client, profile: dict) -> None:
 
 
 async def orm_save_answer(session: AsyncSession, client: Client, text: str, step: str) -> dict:
-    """Применяет ответ к карточке, сохраняет историю и возвращает новый профиль."""
+    """Применяет ответ к карточке, сохраняет историю и возвращает новый профиль.
+
+    Реплику разбирает правила движка плюс LLM (assistant/analyzer.py): при
+    USE_LLM=1 выводы скрещиваются, при ошибке модели остаются правила.
+    """
     profile = profile_of(client)
-    updated = engine.apply_answer(profile, text, step)
+    updated = await analyzer.apply_answer_async(profile, text, step)
     _store_profile(client, updated)
     session.add(DialogueTurn(client_row_id=client.id, role='user', text=text, step=step))
     await session.commit()

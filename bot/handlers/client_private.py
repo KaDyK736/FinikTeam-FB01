@@ -10,9 +10,9 @@ from aiogram.filters import Command, CommandStart, StateFilter
 from aiogram.types import CallbackQuery, Message
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from assistant import engine
+from assistant import answers, engine
 from common.edit_fields import BY_KEY, validate
-from common.menus import ask_next, show_menu
+from common.menus import STOP_TEXT, ask_next, show_menu
 from database.repository import (
     orm_add_turn, orm_edit_field, orm_get_mentor_by_phone, orm_link_client_id,
     orm_link_phone, orm_save_answer, orm_update, profile_of,
@@ -68,7 +68,7 @@ async def press_start(message: Message, state: FSMContext, db_client, db_mentor)
     """Кнопка «Начнем» на экране входа делает то же, что /start, но по-русски."""
     await state.clear()
     if db_client is not None:
-        await show_menu(message, db_client, prefix='Вот ваша анкета:')
+        await show_menu(message, db_client)
         return
     if db_mentor is not None:
         await message.answer(MENTOR_GREETING, reply_markup=hide_keyboard())
@@ -169,16 +169,18 @@ async def show_found(message, state, session, client, status):
         note = (f'Карточка {client.client_id} найдена в базе по номеру '
                 f'{mask_phone(client.site_phone)}, новую не завожу.')
     await message.answer(note)
-    await ask_next(message, state, profile)
+    await ask_next(message, state, profile, previous=profile)
     await orm_update(session, client, dialogue_step=profile.get('dialogue_step'))
 
 
 @client_router.message(F.text == MENU['dialog'])
 async def continue_dialog(message: Message, state: FSMContext, session: AsyncSession, db_client):
+    """«Начать диалог»: только следующий вопрос, а для завершённого — итог."""
     if db_client is None:
         await ask_phone(message, state)
         return
-    profile = await ask_next(message, state, profile_of(db_client))
+    profile = profile_of(db_client)
+    profile = await ask_next(message, state, profile, previous=profile)
     await orm_update(session, db_client, dialogue_step=profile.get('dialogue_step'))
 
 
@@ -189,13 +191,14 @@ async def choose_business_goal(message: Message, state: FSMContext, session: Asy
         await ask_phone(message, state)
         return
     phrase = engine.BUSINESS_GOALS[BUSINESS_MENU[message.text]]
+    before = profile_of(db_client)
     profile = await orm_save_answer(session, db_client, phrase, 'goal')
     await message.answer(
         f'Цель записана: {engine.SEGMENTS.get(profile["segment"], profile["segment"])}.\n'
         'Роль в карточке: '
         f'{engine.ROLE_LABELS[engine.role_of_segment(profile["segment"])]}.',
     )
-    await ask_next(message, state, profile)
+    await ask_next(message, state, profile, previous=before)
     await orm_update(session, db_client, dialogue_step=profile.get('dialogue_step'))
 
 
@@ -241,12 +244,21 @@ async def start_question(message: Message, state: FSMContext, db_client):
 
 @client_router.message(Question.text, F.text)
 async def save_question(message: Message, state: FSMContext, session: AsyncSession, db_client):
+    """Вопрос из меню: отвечаем по базе знаний, чего в базе нет — наставнику."""
     await state.clear()
+    if engine.analyse(message.text).refusal:
+        # Отказ важнее вопроса (KB06): останавливаем диалог по-настоящему,
+        # а не только словами.
+        await orm_save_answer(session, db_client, message.text, 'goal')
+        await message.answer(STOP_TEXT, reply_markup=hide_keyboard())
+        return
+    result = await answers.answer_for(message.text)
+    if result.from_knowledge_base:
+        await orm_add_turn(session, db_client, 'user', message.text.strip()[:200], step='question')
+        await message.answer(result.text, reply_markup=client_menu())
+        return
     await orm_update(session, db_client, open_question=message.text.strip()[:500])
-    await message.answer(
-        'Записал вопрос в карточку. Отвечает на него человек-наставник: актуальных цен, '
-        'акций и условий доставки в учебном наборе нет, выдумывать их я не буду.',
-    )
+    await message.answer(result.text)
     await message.answer(draft_text(db_client), reply_markup=client_menu())
 
 
@@ -305,14 +317,20 @@ async def answer_question(message: Message, state: FSMContext, session: AsyncSes
     if engine.is_farewell(message.text):
         await close_dialogue(message, session, db_client)
         return
+    before = profile_of(db_client)
     profile = await orm_save_answer(session, db_client, message.text, step)
-    await ask_next(message, state, profile)
+    await ask_next(message, state, profile, previous=before)
     await orm_update(session, db_client, dialogue_step=profile.get('dialogue_step'))
 
 
 @client_router.message(StateFilter(None), F.text)
 async def unexpected_text(message: Message, state: FSMContext, session: AsyncSession, db_client):
-    """Свободный текст вне вопроса: считаем его явной репликой о цели (KB01/KB07)."""
+    """Свободный текст вне вопроса.
+
+    Если в реплике есть сведения о цели, интересах или флаге — она идёт в
+    карточку (KB01/KB07). Нечего сказать о карточке — считаем это вопросом:
+    отвечаем по базе знаний либо передаём наставнику с подсказкой про меню.
+    """
     if db_client is None:
         # Человек без карточки мог написать номер сразу, не дожидаясь вопроса.
         await state.set_state(Dialogue.phone)
@@ -324,9 +342,18 @@ async def unexpected_text(message: Message, state: FSMContext, session: AsyncSes
     if engine.is_farewell(message.text):
         await close_dialogue(message, session, db_client)
         return
+    analysis = engine.analyse(message.text)
+    if not (analysis.matched or analysis.refusal):
+        # Ни цели, ни интереса, ни флага, ни отказа: это вопрос, а не сведения в карточку.
+        result = await answers.answer_for(message.text)
+        if not result.from_knowledge_base:
+            await orm_update(session, db_client, open_question=message.text.strip()[:500])
+        await message.answer(result.text, reply_markup=client_menu())
+        return
+    before = profile_of(db_client)
     profile = await orm_save_answer(session, db_client, message.text, 'goal')
     await show_menu(message, db_client, prefix='Записал в карточку.')
-    await ask_next(message, state, profile)
+    await ask_next(message, state, profile, previous=before)
     await orm_update(session, db_client, dialogue_step=profile.get('dialogue_step'))
 
 

@@ -13,6 +13,9 @@
 читаются: сегмент, интересы и отказ по-прежнему выводит движок assistant/engine.py
 из текста реплики. Иначе проверка превратилась бы в переписывание ответа.
 
+Карточка живого демо (F001) первой реплики не получает — её заполняет диалог в
+Telegram, иначе показать первичный диалог с нуля не получится.
+
 Настоящий номер телефона одного клиента берётся из .env (`DEMO_PHONE`, а если он
 не задан — из `MENTOR_PHONE`) и в код не попадает: кейс запрещает публиковать
 реальные персональные данные. Остальные номера вымышленные.
@@ -26,6 +29,11 @@ from utils.validators import normalize_phone
 # Карточка, которой принадлежит настоящий номер пользователя из .env.
 DEMO_CLIENT_ID = 'F001'
 SOURCE_LABEL = 'учебное событие'
+
+# Карточка живого демо сидится пустой: у неё есть только идентификатор, номер и
+# согласие — цель, интересы и флаги появляются из ответов в Telegram. Остальные
+# девять несут initial_message из registration_events.json: так их присылает сайт.
+EMPTY_CARDS = (DEMO_CLIENT_ID,)
 
 
 def my_phone() -> str | None:
@@ -53,7 +61,7 @@ def events() -> list[dict]:
             form['phone'] = real_phone
         result.append({
             'client_id': client_id,
-            'initial_message': item.get('input', ''),
+            'initial_message': '' if client_id in EMPTY_CARDS else item.get('input', ''),
             'source': SOURCE_LABEL,
             'registered_at': '2026-09-23T18:30:00+03:00',
             'site_form': form,

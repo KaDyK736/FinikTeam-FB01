@@ -1,13 +1,13 @@
-# Локальное окружение и секреты
+# Локальное окружение и секреты (бот читает bot/.env)
 .env
 .venv/
-.venv.linux.bak/
 __pycache__/
 *.py[cod]
 
-# Состояние прогона
-my_base.db
+# Состояние прогона: рабочая база и базы проверок
 *.db
+*.db-wal
+*.db-shm
 *.sqlite*
 
 # Редактор
@@ -16,10 +16,8 @@ my_base.db
 # Черновые материалы кейса (docx, скриншоты)
 _inbox/
 
-# Логи прогонов (артефакт проверки — _baseline_qwen25_7b_t03.txt)
-_*.log
+# Логи прогонов вне results/
+*.log
 _paraphrase_report.json
-
-# Разовая проверка холодного старта
 _cold_start_check.py
-_cutoff_*.log
+_cutoff_*

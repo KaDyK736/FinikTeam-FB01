@@ -3,6 +3,8 @@ import asyncio
 import os
 
 from aiogram import Bot, Dispatcher
+from aiogram.client.default import DefaultBotProperties
+from aiogram.client.session.aiohttp import AiohttpSession
 from aiogram.enums import ParseMode
 from aiogram.fsm.storage.memory import MemoryStorage
 from dotenv import find_dotenv, load_dotenv
@@ -45,7 +47,15 @@ async def main():
     if not token:
         raise SystemExit('Не задан TOKEN. Скопируйте .env.example в .env и возьмите токен у @BotFather.')
 
-    bot = Bot(token=token, parse_mode=ParseMode.HTML)
+    # Прокси нужен, когда api.telegram.org недоступен напрямую (например, из вашей сети).
+    # Задаётся в .env: PROXY_URL=http://127.0.0.1:порт  (для socks5 нужен пакет aiohttp_socks).
+    proxy = os.getenv('PROXY_URL', '').strip()
+    session = AiohttpSession(proxy=proxy) if proxy else None
+    if proxy:
+        print(f'[bot] трафик Telegram через прокси {proxy}')
+
+    bot = Bot(token=token, session=session,
+              default=DefaultBotProperties(parse_mode=ParseMode.HTML))
     dp = create_dispatcher()
     dp.startup.register(on_startup)
     dp.shutdown.register(on_shutdown)

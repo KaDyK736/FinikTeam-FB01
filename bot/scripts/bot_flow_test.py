@@ -339,7 +339,7 @@ async def main() -> int:
     labels = buttons(session.last_marks)
     check('список подписан активным фильтром', has(out, 'фильтр «Клиенты»'), out[0][:70] if out else '')
     check('фильтр по цели оставляет только покупателей для себя',
-          {'F001 · Покупка для себя', 'F009 · Покупка для себя'} <= set(labels)
+          {'F009 · Покупка для себя'} <= set(labels)
           and 'F002 · Дополнительный доход' not in labels, str(labels)[:120])
     out = await press(bot, dp, session, FilterCB(role='partner').pack(), MENTOR_TG)
     check('кнопка фильтра работает в списке', has(out, 'Партнёры по бизнесу'), out[-1][:70] if out else '')

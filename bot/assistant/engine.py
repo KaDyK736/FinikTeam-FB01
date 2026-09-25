@@ -339,9 +339,16 @@ def _profile_flags(profile: dict) -> tuple[str, ...]:
     return tuple(item for item in raw.split(',') if item)
 
 
-def replies_for(profile: dict) -> list[str]:
-    """Реплики человеку про красные флаги: без обещаний и выдуманных условий."""
-    return [FLAG_REPLIES[flag] for flag in _profile_flags(profile) if flag in FLAG_REPLIES]
+def replies_for(profile: dict, *, already: dict | None = None) -> list[str]:
+    """Реплики человеку про красные флаги: без обещаний и выдуманных условий.
+
+    `already` — карточка до этого ответа: реплику показываем один раз, когда
+    флаг появился. Иначе каждая кнопка «Начать диалог» повторяла бы все
+    предостережения, накопленные за прошлые реплики.
+    """
+    shown = set(_profile_flags(already) if already else ())
+    return [FLAG_REPLIES[flag] for flag in _profile_flags(profile)
+            if flag in FLAG_REPLIES and flag not in shown]
 
 
 def missing_information(profile: dict) -> list[str]:
@@ -434,13 +441,18 @@ def split_values(raw) -> list[str]:
 
 
 def apply_answer(profile: dict, text: str, step: str) -> dict:
-    """Обновляет профиль клиента по ответу на текущем шаге диалога.
+    """Обновляет профиль по ответу человека, разбирая реплику правилами движка."""
+    return apply_analysis(profile, text, step, analyse(text))
+
+
+def apply_analysis(profile: dict, text: str, step: str, analysis: 'Analysis') -> dict:
+    """Применяет готовый разбор реплики к профилю.
 
     Профиль — плоский dict, чтобы его можно было и сохранить в БД, и разобрать
-    движком без состояния.
+    движком без состояния. Разбор приходит параметром: его считают и правила
+    движка, и LLM-слой (assistant/analyzer.py) — шаги применения одни для всех.
     """
     result = dict(profile)
-    analysis = analyse(text)
 
     if analysis.refusal:
         # Отказ важнее прочих выводов (KB06), но слова человека остаются
