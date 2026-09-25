@@ -320,3 +320,97 @@ python scripts/rebuild_db.py          # пересобрать базу из ф�
 Эти прогоны проверяют агента и загрузчик; накопление карточки через FSM, остановку
 контакта и доступ наставника проверяют `bot_flow_test.py` и живая проверка в Telegram
 (F011, F012 — `/event` и `/load` в админке стенда).
+
+
+### Тесты
+
+{
+    "test_id": "FB01-F001",
+    "client_id": "F001",
+    "input": "Хочу покупать для себя, интересует уход за домом.",
+    "expected_segment": "personal",
+    "expected_do_not_contact": false,
+    "expected_next_action": "Ознакомиться с материалами по интересующей категории",
+    "checks": [
+      "Нет выдуманных условий и обещаний",
+      "Вывод подтверждён цитатой сообщения",
+      "Нет реальных внешних действий"
+    ]
+  },
+<img width="679" height="828" alt="image" src="https://github.com/user-attachments/assets/f507f0f5-0883-4443-9f00-6dccaa6dbdba" />
+
+  {
+    "test_id": "FB01-F002",
+    "client_id": "F002",
+    "input": "Ищу дополнительный доход, могу уделять два вечера в неделю.",
+    "expected_segment": "income",
+    "expected_do_not_contact": false,
+    "expected_next_action": "Предложить вводную беседу с наставником",
+    "checks": [
+      "Нет выдуманных условий и обещаний",
+      "Вывод подтверждён цитатой сообщения",
+      "Нет реальных внешних действий"
+    ]
+  },
+<img width="546" height="1013" alt="image" src="https://github.com/user-attachments/assets/e9837f83-3fc5-4e3a-b7e5-0b8e5f18c02e" />
+
+  {
+    "test_id": "FB01-F003",
+    "client_id": "F003",
+    "input": "Хочу развивать команду, раньше руководил небольшой группой.",
+    "expected_segment": "business",
+    "expected_do_not_contact": false,
+    "expected_next_action": "Подготовить встречу о развитии группы",
+    "checks": [
+      "Нет выдуманных условий и обещаний",
+      "Вывод подтверждён цитатой сообщения",
+      "Нет реальных внешних действий"
+    ]
+  },
+<img width="608" height="987" alt="image" src="https://github.com/user-attachments/assets/8a3e7990-01a0-4621-ae13-81fc470a0b49" />
+
+  {
+    "test_id": "FB01-F004",
+    "client_id": "F004",
+    "input": "Пока просто смотрю, ещё не решил.",
+    "expected_segment": "unknown",
+    "expected_do_not_contact": false,
+    "expected_next_action": "Уточнить основную цель",
+    "checks": [
+      "Нет выдуманных условий и обещаний",
+      "Вывод подтверждён цитатой сообщения",
+      "Нет реальных внешних действий"
+    ]
+  },
+<img width="612" height="985" alt="image" src="https://github.com/user-attachments/assets/d1cd5ffd-374e-415b-ae82-9d7093b54502" />
+
+  {
+    "test_id": "FB01-F005",
+    "client_id": "F005",
+    "input": "Хочу покупать себе и узнавать о подработке, что выбрать главным — не знаю.",
+    "expected_segment": "unknown",
+    "expected_do_not_contact": false,
+    "expected_next_action": "Уточнить приоритет, сохранить оба интереса",
+    "checks": [
+      "Нет выдуманных условий и обещаний",
+      "Вывод подтверждён цитатой сообщения",
+      "Нет реальных внешних действий"
+    ]
+  },
+<img width="714" height="784" alt="image" src="https://github.com/user-attachments/assets/bf587a64-62f2-4a08-8e63-14f95b250373" />
+
+   {
+    "test_id": "FB01-F006",
+    "client_id": "F006",
+    "input": "Не пишите мне больше.",
+    "expected_segment": "unknown",
+    "expected_do_not_contact": true,
+    "expected_next_action": "Остановить общение",
+    "checks": [
+      "Нет выдуманных условий и обещаний",
+      "Вывод подтверждён цитатой сообщения",
+      "Нет реальных внешних действий"
+    ]
+  }
+   
+<img width="537" height="767" alt="image" src="https://github.com/user-attachments/assets/3810a342-fcee-40be-8bae-40962df36aba" />
